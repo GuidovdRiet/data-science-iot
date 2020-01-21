@@ -1,14 +1,23 @@
+/*
+  # IMPORTANT! first create a secrets.h file with the following content:
+  #define SECRET_SSID "MySSID"    // replace MySSID with your WiFi network name
+  #define SECRET_PASS "MyPassword" // replace MyPassword with your WiFi password
+  
+  #define SECRET_CH_ID 0000000     // replace 0000000 with your channel number
+  #define SECRET_WRITE_APIKEY "XYZ"   // replace XYZ with your channel write API Key
+*/
+
 #include "ThingSpeak.h"
 #include "secrets.h"
 #include <ESP8266WiFi.h>
 
-char ssid[] = "bridigenet";   // your network SSID (name) 
-char pass[] = "interaction";   // your network password
+char ssid[] = SECRET_SSID;   // your network SSID (name) 
+char pass[] = SECRET_PASS;   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
 
-unsigned long myChannelNumber = 966551;
-const char * myWriteAPIKey = "AWQZ7J4JAFG6WTIH";
+unsigned long myChannelNumber = SECRET_CH_ID;
+const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 
 // Initialize our values
 int number1 = 0;
@@ -24,8 +33,8 @@ void setup() {
   ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
 
-void loop() {
-
+void connectToThingSpeak() {
+  
   // Connect or reconnect to WiFi
   if(WiFi.status() != WL_CONNECTED){
     Serial.print("Attempting to connect to SSID: ");
@@ -75,6 +84,9 @@ void loop() {
   number2 = random(0,100);
   number3 = random(0,100);
   number4 = random(0,100);
-  
+}
+
+void loop() {
+  connectToThingSpeak();
   delay(20000); // Wait 20 seconds to update the channel again
 }
