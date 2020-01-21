@@ -59,44 +59,6 @@ void setup() {
 }
 
 int counter = 0;
-void getSgpValues() {
-  // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
-  //float temperature = 22.1; // [°C]
-  //float humidity = 45.2; // [%RH]
-  //sgp.setHumidity(getAbsoluteHumidity(temperature, humidity));
-
-  if (! sgp.IAQmeasure()) {
-    Serial.println("Measurement failed");
-    return;
-  }
-  Serial.print("TVOC "); Serial.print(sgp.TVOC); Serial.print(" ppb\t");
-  Serial.print("eCO2 "); Serial.print(sgp.eCO2); Serial.println(" ppm");
-
-  if (! sgp.IAQmeasureRaw()) {
-    Serial.println("Raw Measurement failed");
-    return;
-  }
-  Serial.print("Raw H2 "); Serial.print(sgp.rawH2); Serial.print(" \t");
-  Serial.print("Raw Ethanol "); Serial.print(sgp.rawEthanol); Serial.println("");
- 
-  delay(1000);
-
-  counter++;
-  if (counter == 30) {
-    counter = 0;
-
-    uint16_t TVOC_base, eCO2_base;
-    if (! sgp.getIAQBaseline(&eCO2_base, &TVOC_base)) {
-      Serial.println("Failed to get baseline readings");
-      return;
-    }
-    Serial.print("****Baseline values: eCO2: 0x"); Serial.print(eCO2_base, HEX);
-    Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
-  }
-}
-
-
-
 void connectToThingSpeak() {
   
   // Connect or reconnect to WiFi
@@ -111,25 +73,44 @@ void connectToThingSpeak() {
     Serial.println("\nConnected.");
   }
 
-  // set the fields with the values
-  ThingSpeak.setField(1, number1);
-  ThingSpeak.setField(2, number2);
-  ThingSpeak.setField(3, number3);
-  ThingSpeak.setField(4, number4);
+  // Measure first two values
+  if (! sgp.IAQmeasure()) {
+    Serial.println("Measurement failed");
+    return;
+  }
+  Serial.print("TVOC "); Serial.print(sgp.TVOC); Serial.print(" ppb\t");
+  Serial.print("eCO2 "); Serial.print(sgp.eCO2); Serial.println(" ppm");
 
-  // figure out the status message
-  if(number1 > number2){
-    myStatus = String("field1 is greater than field2"); 
+  // set the fields(TVOC, eCO2) to first two fields in thingspeak(1, 2).
+  ThingSpeak.setField(1, sgp.TVOC);
+  ThingSpeak.setField(2, sgp.eCO2);
+
+  // Measure raw values
+  if (! sgp.IAQmeasureRaw()) {
+    Serial.println("Raw Measurement failed");
+    return;
   }
-  else if(number1 < number2){
-    myStatus = String("field1 is less than field2");
+  Serial.print("Raw H2 "); Serial.print(sgp.rawH2); Serial.print(" \t");
+  Serial.print("Raw Ethanol "); Serial.print(sgp.rawEthanol); Serial.println("");
+
+  // set the fields(rawH2, rawEthanol) to first two fields in thingspeak(1, 2).
+  ThingSpeak.setField(3, sgp.rawH2);
+  ThingSpeak.setField(4, sgp.rawEthanol);
+
+  delay(1000);
+
+  counter++;
+  if (counter == 30) {
+    counter = 0;
+
+    uint16_t TVOC_base, eCO2_base;
+    if (! sgp.getIAQBaseline(&eCO2_base, &TVOC_base)) {
+      Serial.println("Failed to get baseline readings");
+      return;
+    }
+    Serial.print("****Baseline values: eCO2: 0x"); Serial.print(eCO2_base, HEX);
+    Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
   }
-  else{
-    myStatus = String("field1 equals field2");
-  }
-  
-  // set the status
-  ThingSpeak.setStatus(myStatus);
   
   // write to the ThingSpeak channel
   int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
@@ -139,19 +120,9 @@ void connectToThingSpeak() {
   else{
     Serial.println("Problem updating channel. HTTP error code " + String(x));
   }
-  
-  // change the values
-  number1++;
-  if(number1 > 99){
-    number1 = 0;
-  }
-  number2 = random(0,100);
-  number3 = random(0,100);
-  number4 = random(0,100);
 }
 
 void loop() {
-  getSgpValues();
-  connectToThingSpeak(); // connect to Wifi and ThingSpeak
+  connectToThingSpeak(); // connect to Wifi and ThingSpeak and set values
   delay(20000); // Wait 20 seconds to update the channel again
 }
