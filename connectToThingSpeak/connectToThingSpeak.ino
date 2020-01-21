@@ -10,6 +10,10 @@
 #include "ThingSpeak.h"
 #include "secrets.h"
 #include <ESP8266WiFi.h>
+#include <Wire.h>
+#include "Adafruit_SGP30.h"
+
+Adafruit_SGP30 sgp;
 
 char ssid[] = SECRET_SSID;   // your network SSID (name) 
 char pass[] = SECRET_PASS;   // your network password
@@ -26,12 +30,72 @@ int number3 = random(0,100);
 int number4 = random(0,100);
 String myStatus = "";
 
-void setup() {
-  Serial.begin(115200);  // Initialize serial
+uint32_t getAbsoluteHumidity(float temperature, float humidity) {
+  // approximation formula from Sensirion SGP30 Driver Integration chapter 3.15
+  const float absoluteHumidity = 216.7f * ((humidity / 100.0f) * 6.112f * exp((17.62f * temperature) / (243.12f + temperature)) / (273.15f + temperature)); // [g/m^3]
+  const uint32_t absoluteHumidityScaled = static_cast<uint32_t>(1000.0f * absoluteHumidity); // [mg/m^3]
+  return absoluteHumidityScaled;
+}
 
+void SgpInit() {
+  Serial.println("SGP30 test");
+  
+  if (! sgp.begin()){
+    Serial.println("Sensor not found :(");
+    while (1);
+  }
+  Serial.print("Found SGP30 serial #");
+  Serial.print(sgp.serialnumber[0], HEX);
+  Serial.print(sgp.serialnumber[1], HEX);
+  Serial.println(sgp.serialnumber[2], HEX);
+}
+
+void setup() {
+  Serial.begin(9600);  // Initialize serial
+  
+  SgpInit();
   WiFi.mode(WIFI_STA); 
   ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
+
+int counter = 0;
+void getSgpValues() {
+  // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
+  //float temperature = 22.1; // [°C]
+  //float humidity = 45.2; // [%RH]
+  //sgp.setHumidity(getAbsoluteHumidity(temperature, humidity));
+
+  if (! sgp.IAQmeasure()) {
+    Serial.println("Measurement failed");
+    return;
+  }
+  Serial.print("TVOC "); Serial.print(sgp.TVOC); Serial.print(" ppb\t");
+  Serial.print("eCO2 "); Serial.print(sgp.eCO2); Serial.println(" ppm");
+
+  if (! sgp.IAQmeasureRaw()) {
+    Serial.println("Raw Measurement failed");
+    return;
+  }
+  Serial.print("Raw H2 "); Serial.print(sgp.rawH2); Serial.print(" \t");
+  Serial.print("Raw Ethanol "); Serial.print(sgp.rawEthanol); Serial.println("");
+ 
+  delay(1000);
+
+  counter++;
+  if (counter == 30) {
+    counter = 0;
+
+    uint16_t TVOC_base, eCO2_base;
+    if (! sgp.getIAQBaseline(&eCO2_base, &TVOC_base)) {
+      Serial.println("Failed to get baseline readings");
+      return;
+    }
+    Serial.print("****Baseline values: eCO2: 0x"); Serial.print(eCO2_base, HEX);
+    Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
+  }
+}
+
+
 
 void connectToThingSpeak() {
   
@@ -87,6 +151,7 @@ void connectToThingSpeak() {
 }
 
 void loop() {
-  connectToThingSpeak();
+  getSgpValues();
+  connectToThingSpeak(); // connect to Wifi and ThingSpeak
   delay(20000); // Wait 20 seconds to update the channel again
 }
