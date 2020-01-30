@@ -2,7 +2,7 @@
 
 ![UML Diagram](./assets/result.jpg)
 
-This project measures indoor air quality with an SGP-30 sensor. The data will be sent to ThingSpeak(thingspeak.com) to create insights in the air quality of the measured building. The measurement of this sensor is divided into four separate values.
+This project measures indoor air quality with an SGP-30 sensor. The data will be sent to ThingSpeak(thingspeak.com) to create insights in the air quality of the measured building. The measurement of this sensor is divided into four separate values. [Check the current air quality in my house.](https://thingspeak.com/channels/966551 "Check ThingSpeak")
 
 ### Volatile Organic Compounds (VOCs)
 
