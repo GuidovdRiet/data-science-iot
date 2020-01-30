@@ -26,19 +26,15 @@ The amount of hydrogen(h2) and Ethanol in the room.
 
 ### Hardware
 ![UML Diagram](./assets/overview.jpg)
-SGP 30 sensor
-ESP 8266
-4 Jumper wires
-Breadboard
-Micro-USB cable that allows sync (A lot of USB cables are made for charging only)
-
-Foto toevoegen
+* SGP 30 sensor
+* ESP 8266
+* 4 Jumper wires
+* Breadboard
+* Micro-USB cable that allows sync (A lot of USB cables are made for charging only)
 
 ### Software
-ThingSpeak
-Arduino IDE
-
-And a computer and working internet connection that allows receiving data.
+* ThingSpeak
+* Arduino IDE
 
 ### Connect the SGP-30 to the ESP-8266
 ![UML Diagram](./assets/nodemcu.jpg)
