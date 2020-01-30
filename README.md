@@ -1,5 +1,7 @@
 # IoT, Measure Air quality with an ESP-8266(NodeMCU v2) and SGP-30
 
+![UML Diagram](./assets/result.jpg)
+
 This project measures indoor air quality with an SGP-30 sensor. The data will be sent to ThingSpeak(thingspeak.com) to create insights in the air quality of the measured building. The measurement of this sensor is divided into four separate values.
 
 ### Volatile Organic Compounds (VOCs)
@@ -22,7 +24,8 @@ The amount of hydrogen(h2) and Ethanol in the room.
 
 ## How to build this IoT project?
 
-_Hardware_
+### Hardware
+![UML Diagram](./assets/overview.jpg)
 SGP 30 sensor
 ESP 8266
 4 Jumper wires
@@ -31,30 +34,24 @@ Micro-USB cable that allows sync (A lot of USB cables are made for charging only
 
 Foto toevoegen
 
-_Software_
+### Software
 ThingSpeak
 Arduino IDE
 
 And a computer and working internet connection that allows receiving data.
 
 ### Connect the SGP-30 to the ESP-8266
-
-Foto toevoegen
+![UML Diagram](./assets/nodemcu.jpg)
+![UML Diagram](./assets/sgp.jpg)
 
 ### Install Adafruit SGP-30 library
-
-https://cdn-learn.adafruit.com/downloads/pdf/adafruit-sgp30-gas-tvoc-eco2-mox-sensor.pdf
+[Tutorial](https://cdn-learn.adafruit.com/downloads/pdf/adafruit-sgp30-gas-tvoc-eco2-mox-sensor.pdf "Tutorial")
 
 ### Connect the ESP-8266
-
-https://www.teachmemicro.com/intro-nodemcu-arduino/
+[Tutorial](https://www.teachmemicro.com/intro-nodemcu-arduino/ "Tutorial")
 
 ### Create a ThingSpeak account
-
-https://thingspeak.com/users/sign_up
+[Create account](https://thingspeak.com/users/sign_up "Create account")
 
 ### Download the demo from this repository
-
 Fill in the right ThingSpeak channels and Wifi credentials in the secrets.h file.
-
-Foto toevoegen
